@@ -12,3 +12,5 @@ Dr. Mary Lowe, Professor at Loyola Universtity Maryland
 
 ## Project Description
 ## Insatlation Instructions
+## How to Run
+## How to Test
