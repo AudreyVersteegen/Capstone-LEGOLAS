@@ -1,7 +1,7 @@
 # Capstone-LEGOLAS
 
 ## Contributors
-This is a Capstone project at Loyola University Maryland.
+This is a CS 496 Capstone Project at Loyola University Maryland.
 #### Students:
 Clark, Brendan
 
