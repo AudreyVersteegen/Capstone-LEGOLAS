@@ -20,6 +20,8 @@ import sv_ttk
 import os
 import platform
 
+import pdb
+
 # if os.name == 'nt':
 if platform.system() == 'Windows':
     # windows GUI graphic options
@@ -154,6 +156,11 @@ def log_motor_pos(positions_map, entry_pos_name, lbl_v, motor):
 
     lbl_v.config(text=str(value))
 
+def check_for_miss(target_pos, current_pos):
+    print("target position: ", target_pos)
+    print("current position: ", current_pos)
+    if(current_pos != target_pos):
+        error_target_missed_message();
 
 def goto_motor_pos(positions_map, entry_pos_name, motor):
     if motor is not None:
@@ -166,6 +173,10 @@ def goto_motor_pos(positions_map, entry_pos_name, motor):
            speed=5,
            max_iter=4
         )
+
+        if(motor == context.depo_device.motor_S):
+            check_for_miss(pos, motor.get_position())
+
         # curr_pos = motor.get_position()
         # motor.run_for_degrees(pos-curr_pos, speed=5)
     else:
@@ -936,6 +947,18 @@ def load_config(win, frame):
 
 #     return r_buildhat1, r_serial1, r_threading1, motor_X, sensor_X, motor_Y, sensor_Y, r_buildhat2, motor_pH, motor_S, motor_V
 
+
+def error_target_missed_message():
+    error_win = tk.Toplevel()
+    error_win.geometry("200x100")
+    error_win.title("ERROR")
+
+    error_win.grab_set()
+
+    ttk.Label(error_win, text="target has been missed").pack(pady=10)
+    ttk.Button(error_win, text="OK", command=error_win.destroy).pack()
+
+    error_win.wait_window()
 
 def main(win):
     win.geometry("600x450")
