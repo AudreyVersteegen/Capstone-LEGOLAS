@@ -17,6 +17,14 @@ from matplotlib import pyplot as plt
 
 from scipy.interpolate import interp1d
 
+# added imports
+import socket
+import cv2
+import numpy as np
+
+import io
+from PIL import Image
+
 # import cv2 # computer vision package
 # import GPy
 
@@ -54,6 +62,12 @@ def motor_move_to_pos(motor, pos, speed=None, max_iter=4, blocking=True):
         curr_pos = motor.get_position()
         n += 1
 
+def display_image(img_bytes):
+    nparr = np.frombuffer(img_bytes, np.uint8)
+    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    cv2.imshow("Image from Server", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 def connect_pi1(address, ports_map):
     # Connect to and Define Buildhats 
@@ -61,6 +75,10 @@ def connect_pi1(address, ports_map):
     r_buildhat1 = conn.modules.buildhat # XY Control
     r_serial1 = conn.modules.serial
     r_threading1 = conn.modules.threading
+
+    conn2 = rpyc.connect("192.168.1.11", 18813)
+    img_bytes = conn2.root.exposed_capture_and_detect_circles()
+    display_image(img_bytes)
 
     #Motors and Sensors (BH1)
     sensor_X = r_buildhat1.ForceSensor(ports_map['force_sensor']['x']) # X axis sensor
