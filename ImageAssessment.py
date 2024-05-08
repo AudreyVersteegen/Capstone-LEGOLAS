@@ -1,6 +1,4 @@
 import os
-
-import PIL.Image
 import numpy as np
 import torch
 import torchvision
@@ -175,9 +173,9 @@ def make_grid_lines(pointList):
     vert_lines = calculate_best_fit(vert_groups)
     horiz_lines = calculate_best_fit(horiz_groups)
 
-    return vert_groups, horiz_groups, vert_lines, horiz_lines
+    return horiz_groups, vert_groups, horiz_lines, vert_lines
 
-def plot_grid(x_coords, y_coords, vert_lines, horiz_lines):
+def plot_grid(x_coords, y_coords, horiz_lines, vert_lines):
     plt.plot(x_coords, y_coords, 'o')
     plt.ylim(0, 928)
     plt.xlim(0, 900)
@@ -202,6 +200,68 @@ def plot_grid(x_coords, y_coords, vert_lines, horiz_lines):
     plt.xlim(0, 936)
     plt.show()
 
-def get_distance(point, vert_lines, horiz_lines):
-    
+def get_distance(point, line):
+  x = point[0]
+  y = point[1]
 
+  # convert from y = ax + b to ax + by + c = 0
+  a = -1 * line[0]
+  b = 1
+  c = -1 * line[1]
+
+  dist = (abs(a*x + b*y + c))/ (math.sqrt(a*a + b*b))
+
+  return dist
+
+def get_nearest_line(point, horiz_lines, vert_lines):
+    min_vert_dist = -1
+    min_horiz_dist = -1
+
+    nearest_vert = []
+    nearest_horiz = []
+
+    for line in vert_lines:
+        dist = get_distance(point, line)
+        if min_vert_dist == -1:
+            min_vert_dist = dist
+            nearest_vert = line
+        elif min_vert_dist > dist:
+            min_vert_dist = dist
+            nearest_vert = line
+
+    for line in horiz_lines:
+        dist = get_distance(point, line)
+        if min_horiz_dist == -1:
+            min_horiz_dist = dist
+            nearest_horiz = line
+        elif min_horiz_dist > dist:
+            min_horiz_dist = dist
+            nearest_horiz = line
+
+    return nearest_horiz, nearest_vert
+
+def verify_x_pos(point, vert_line, error_space):
+    x_offset = get_distance(point, vert_line)
+    change_needed = (abs(x_offset) <= error_space)
+    return change_needed, x_offset
+
+def verify_y_pos(point, horiz_line, error_space, diameter):
+    dist = get_distance(point, horiz_line)
+
+    y_offset = dist % diameter
+    change_needed = (abs(y_offset) <= error_space)
+    return y_offset
+
+def adjust_pos(point, horiz_line, vert_line, error, diameter):
+    x_good, x_offset = verify_x_pos(point, vert_line, error)
+    y_good, y_offset = verify_y_pos(point, vert_line, error, diameter)
+    
+    change_x = 0
+    change_y = 0
+    
+    if not x_good:
+        change_x = x_offset
+    if not y_good:
+        change_y = y_offset
+    
+    return change_x, change_y
