@@ -15,5 +15,6 @@ The LEGO-based Low-cost Autonomous Scientist (LEGOLAS) is a low cost solution to
 
 ## Insatlation Instructions
 dataset can be found at https://drive.google.com/file/d/1pEE_Kq6wtxsWpd7Atc1lKsCQilUrcppn/view?usp=drive_link
+Trained model can be found at https://studentsloyola-my.sharepoint.com/:u:/g/personal/arversteegen_loyola_edu/EYWHuGRhSgVLg4ie0CfrDBUBJZzpZamqoQdZceh2qHtEsA?e=CobIiI 
 ## How to Run
 ## How to Test
