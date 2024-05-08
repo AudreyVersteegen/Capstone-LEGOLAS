@@ -1,6 +1,6 @@
 import paramiko # for interacting over ssh
 
-default_pi_username = "pi"
+default_pi_username = "greenleaf"
 default_pi_password = "raspberry"
 
 def find_server_pid(ssh):
@@ -42,7 +42,7 @@ def restart_server(
 
     print(f"restarting the rpyc server at host: {host}")
     try:
-        start_rpyc_cmd = "bash /home/pi/auto_rpyc_server.sh"
+        start_rpyc_cmd = "bash /home/greenleaf/auto_rpyc_server.sh"
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(start_rpyc_cmd)
         print("rpyc server start successfully")
     except Exception as e:

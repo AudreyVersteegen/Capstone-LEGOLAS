@@ -25,6 +25,10 @@ import numpy as np
 import io
 from PIL import Image
 
+from ImageAssessment import *
+conn2 = rpyc.connect("192.168.1.12", 18813)
+model, data_transform = load_model('model_10.pt')
+
 # import cv2 # computer vision package
 # import GPy
 
@@ -76,9 +80,9 @@ def connect_pi1(address, ports_map):
     r_serial1 = conn.modules.serial
     r_threading1 = conn.modules.threading
 
-    conn2 = rpyc.connect("192.168.1.11", 18813)
-    img_bytes = conn2.root.exposed_capture_and_detect_circles()
-    display_image(img_bytes)
+    # conn2 = rpyc.connect("192.168.1.11", 18813)
+    # img_bytes = conn2.root.exposed_capture_and_detect_circles()
+    # display_image(img_bytes)
 
     #Motors and Sensors (BH1)
     sensor_X = r_buildhat1.ForceSensor(ports_map['force_sensor']['x']) # X axis sensor
@@ -316,9 +320,93 @@ class Stage:
 
 
     def move_to_cell(self, row, col, device_x_offset=0, device_y_offset=0):
+        print("moving to cell")
         positionX, positionY = self.cell_loc_map[row, col]
         self.move_to_deg(positionX, positionY, device_x_offset, device_y_offset)
 
+
+        img_bytes = conn2.root.exposed_capture_and_detect_circles()
+
+        nparr = np.frombuffer(img_bytes, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        pil_image = Image.fromarray(image)
+
+        processed_image = preprocess_image(pil_image)
+
+        image = data_transform(processed_image)
+        img_list = [image]
+
+        pred = make_prediction(model, img_list, 0.5)
+        pred_array = pred[0]['boxes'].detach().numpy()
+
+        coords, x_coords, y_coords = convert_to_coords(pred_array)
+
+        # v_group, h_group, v_line, h_line = make_grid_lines(coords)
+        h_group, v_group, h_line, v_line = make_grid_lines(coords)
+
+        plot_grid(x_coords, y_coords, h_line, v_line, processed_image)
+        pH_pixels = [483, 745]
+        error = 15
+        diameter = 245
+        x_value, y_value = adjust_pos(pH_pixels, h_line, v_line, error, diameter)
+
+        if(x_value == 0 and y_value == 0):
+            print("no change needed")
+            print("x_value: " + x_value)
+            print("y_value: " + y_value)
+        else:
+            print("change needed")
+            print("x_value: " + str(x_value))
+            print("y_value: " + str(y_value))
+            print("making adjustments")
+            self.move_to_deg(positionX + (x_value * .55), positionY + (y_value * .55), device_x_offset, device_y_offset)
+
+    # def move_to_cell2(self, pos_x, pos_y, device_x_offset=0, device_y_offset=0):
+    #     print("moving to cell")
+    #     positionX = pos_x
+    #     positionY = pos_y
+        
+    #     #positionX, positionY = self.cell_loc_map[pos_x, pos_x]
+    #     self.move_to_deg(positionX, positionY, device_x_offset, device_y_offset)
+
+
+    #     img_bytes = conn2.root.exposed_capture_and_detect_circles()
+
+    #     nparr = np.frombuffer(img_bytes, np.uint8)
+    #     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    #     pil_image = Image.fromarray(image)
+
+    #     processed_image = preprocess_image(pil_image)
+
+    #     image = data_transform(processed_image)
+    #     img_list = [image]
+
+    #     pred = make_prediction(model, img_list, 0.5)
+    #     pred_array = pred[0]['boxes'].detach().numpy()
+
+    #     coords, x_coords, y_coords = convert_to_coords(pred_array)
+
+    #     v_group, h_group, v_line, h_line = make_grid_lines(coords)
+
+    #     plot_grid(x_coords, y_coords, h_line, v_line, processed_image)
+    #     pH_pixels = [483, 745]
+    #     error = 15
+    #     diameter = 245
+    #     x_value, y_value = adjust_pos(pH_pixels, h_line, v_line, error, diameter)
+        
+    #     if(x_value == 0 and y_value == 0):
+    #         print("no change needed")
+    #         print("x_value: " + x_value)
+    #         print("y_value: " + y_value)
+    #     else:
+    #         print("change needed")
+    #         print("x_value: " + str(x_value))
+    #         print("y_value: " + str(y_value))
+    #         print("making adjustments")
+    #         self.move_to_deg(positionX, positionY, device_x_offset, device_y_offset)
+        
 
     def move_to_loc(self, location, device_x_offset=0, device_y_offset=0):
         if isinstance(self.aux_loc_map, dict):
