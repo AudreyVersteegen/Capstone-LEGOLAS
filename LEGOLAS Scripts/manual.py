@@ -1,4 +1,5 @@
 from core import *
+from ImageAssessment import *
 import utils
 
 import threading
@@ -21,6 +22,10 @@ import os
 import platform
 
 import pdb
+import rpyc
+
+# conn2 = rpyc.connect("192.168.1.12", 18813)
+# model, data_transform = load_model('model_10.pt')
 
 # if os.name == 'nt':
 if platform.system() == 'Windows':
@@ -174,8 +179,10 @@ def goto_motor_pos(positions_map, entry_pos_name, motor):
            max_iter=4
         )
 
-        if(motor == context.depo_device.motor_S):
-            check_for_miss(pos, motor.get_position())
+        print("moving device")
+
+        #if(motor == context.depo_device.motor_S):
+            #check_for_miss(pos, motor.get_position())
 
         # curr_pos = motor.get_position()
         # motor.run_for_degrees(pos-curr_pos, speed=5)
@@ -312,6 +319,32 @@ def goto_cell_loc(stage, entry_cell_loc):
     loc_i, loc_j = list( map(int, loc_ij.split(" ")) )
     x_loc, y_loc = stage.cell_loc_map[loc_i, loc_j]
     stage.move_to_deg(x_degree=x_loc, y_degree=y_loc)
+
+    # img_bytes = conn2.root.exposed_capture_and_detect_circles()
+
+    # nparr = np.frombuffer(img_bytes, np.uint8)
+    # image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    # pil_image = Image.fromarray(image)
+
+
+    # processed_image = preprocess_image(pil_image)
+
+    # image = data_transform(processed_image)
+    # img_list = [image]
+
+    # pred = make_prediction(model, img_list, 0.5)
+    # pred_array = pred[0]['boxes'].detach().numpy()
+
+    # coords, x_coords, y_coords = convert_to_coords(pred_array)
+
+    # v_group, h_group, v_line, h_line = make_grid_lines(coords)
+
+    # plot_grid(x_coords, y_coords, h_line, v_line, processed_image)
+    # pH_pixels = [483, 745]
+    # error = 15
+    # diameter = 245
+    # adjust_pos(pH_pixels, h_line, v_line, error, diameter)
 
 
 def clear_cell_loc(stage):
