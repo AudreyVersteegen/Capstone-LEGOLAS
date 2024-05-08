@@ -18,7 +18,6 @@ from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
 
 # added imports
-import socket
 import cv2
 import numpy as np
 
@@ -346,7 +345,8 @@ class Stage:
         h_group, v_group, h_line, v_line = make_grid_lines(coords)
 
         plot_grid(x_coords, y_coords, h_line, v_line, processed_image)
-        pH_pixels = [483, 745]
+        # pH_pixels = [483, 745]
+        pH_pixels = [394, 663]
         error = 15
         diameter = 245
         x_value, y_value = adjust_pos(pH_pixels, h_line, v_line, error, diameter)
